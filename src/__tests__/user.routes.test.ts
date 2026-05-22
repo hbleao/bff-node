@@ -7,11 +7,11 @@ const ALICE_ID = "a1b2c3d4-0001-0001-0001-000000000001";
 const BRUNO_ID = "a1b2c3d4-0002-0002-0002-000000000002";
 const CARLA_ID = "a1b2c3d4-0003-0003-0003-000000000003";
 
-describe("GET /health", () => {
+describe("GET /actuator/health", () => {
 	it("returns status ok", async () => {
-		const res = await request(app).get("/health");
+		const res = await request(app).get("/actuator/health");
 		expect(res.status).toBe(200);
-		expect(res.body).toMatchObject({ status: "ok" });
+		expect(res.body).toMatchObject({ status: "UP" });
 	});
 });
 

@@ -10,6 +10,7 @@ const envSchema = z.object({
 	PORT: z.coerce.number().default(3000),
 	LOG_LEVEL: z.enum(["error", "warn", "info", "debug"]).default("info"),
 	LOG_DIR: z.string().default("logs"),
+	SLOW_REQUEST_THRESHOLD_MS: z.coerce.number().default(2000),
 	MULESOFT_ORIGIN: z.string().default("http://localhost:3000"),
 	EXTERNAL_API_URL: z.string().url().optional(),
 	EXTERNAL_API_KEY: z.string().optional(),
