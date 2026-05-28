@@ -8,13 +8,14 @@ import swaggerUi from "swagger-ui-express";
 
 import { env } from "./config";
 import { metricsRegistry } from "./config/metrics";
+import { createContainer } from "./container";
 import { openApiDocument } from "./docs/openapi";
 import {
 	errorMiddleware,
 	metricsMiddleware,
 	requestLogger,
 } from "./middlewares";
-import { router } from "./routes";
+import { createRouter } from "./routes";
 
 const app: Application = express();
 
@@ -59,7 +60,7 @@ if (env.NODE_ENV !== "production") {
 }
 
 // Routes
-app.use("/api/v1", router);
+app.use("/api/v1", createRouter(createContainer()));
 
 // Error handler (must be last)
 app.use(errorMiddleware);

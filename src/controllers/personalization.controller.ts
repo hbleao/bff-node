@@ -1,12 +1,6 @@
 import type { Request, Response } from "express";
-import { z } from "zod";
+import { trackEventSchema } from "../schemas/personalization.schemas";
 import type { IPersonalizationService } from "../services/interfaces/personalization.service.interface";
-
-const trackEventSchema = z.object({
-	userId: z.string().min(1),
-	action: z.string().min(1),
-	itemId: z.string().min(1).optional(),
-});
 
 export class PersonalizationController {
 	constructor(

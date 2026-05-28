@@ -1,10 +1,13 @@
-import { IRouter, Router } from "express";
-import { personalizationRoutes } from "./personalization.routes";
-import { userRoutes } from "./user.routes";
+import { type IRouter, Router } from "express";
+import type { Container } from "../container";
+import { createPersonalizationRouter } from "./personalization.routes";
+import { createUserRouter } from "./user.routes";
 
-const router: IRouter = Router();
+export function createRouter(container: Container): IRouter {
+	const router: IRouter = Router();
 
-router.use("/users", userRoutes);
-router.use("/personalization", personalizationRoutes);
+	router.use("/users", createUserRouter(container));
+	router.use("/personalization", createPersonalizationRouter(container));
 
-export { router };
+	return router;
+}

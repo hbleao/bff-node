@@ -1,16 +1,6 @@
 import { Request, Response } from "express";
-import { z } from "zod";
+import { createUserSchema, updateUserSchema } from "../schemas/user.schemas";
 import { IUserService } from "../services/interfaces/user.service.interface";
-
-const createUserSchema = z.object({
-	name: z.string().min(1).max(100),
-	email: z.string().email(),
-});
-
-const updateUserSchema = z.object({
-	name: z.string().min(1).max(100).optional(),
-	email: z.string().email().optional(),
-});
 
 export class UserController {
 	constructor(private readonly userService: IUserService) {}

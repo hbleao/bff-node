@@ -1,9 +1,16 @@
-import { env } from "../config";
 import { AppError } from "../errors/app-error";
 import type {
 	ISalesforcePersonalizationRepository,
 	SalesforcePersonalizationEvent,
 } from "./interfaces/salesforce-personalization.repository.interface";
+
+export interface SalesforceConfig {
+	baseUrl: string;
+	datasetId: string;
+	clientId: string;
+	clientSecret: string;
+	tokenUrl: string;
+}
 
 interface TokenCache {
 	token: string;
@@ -17,32 +24,15 @@ export class SalesforcePersonalizationRepository
 	private readonly datasetId: string;
 	private readonly clientId: string;
 	private readonly clientSecret: string;
+	private readonly tokenUrl: string;
 	private tokenCache: TokenCache | null = null;
 
-	constructor() {
-		const {
-			SF_PERSONALIZATION_BASE_URL,
-			SF_PERSONALIZATION_DATASET_ID,
-			SF_PERSONALIZATION_CLIENT_ID,
-			SF_PERSONALIZATION_CLIENT_SECRET,
-		} = env;
-
-		if (
-			!SF_PERSONALIZATION_BASE_URL ||
-			!SF_PERSONALIZATION_DATASET_ID ||
-			!SF_PERSONALIZATION_CLIENT_ID ||
-			!SF_PERSONALIZATION_CLIENT_SECRET
-		) {
-			throw new AppError(
-				"Salesforce Personalization environment variables must be configured",
-				500,
-			);
-		}
-
-		this.baseUrl = SF_PERSONALIZATION_BASE_URL;
-		this.datasetId = SF_PERSONALIZATION_DATASET_ID;
-		this.clientId = SF_PERSONALIZATION_CLIENT_ID;
-		this.clientSecret = SF_PERSONALIZATION_CLIENT_SECRET;
+	constructor(config: SalesforceConfig) {
+		this.baseUrl = config.baseUrl;
+		this.datasetId = config.datasetId;
+		this.clientId = config.clientId;
+		this.clientSecret = config.clientSecret;
+		this.tokenUrl = config.tokenUrl;
 	}
 
 	private async getAccessToken(): Promise<string> {
@@ -50,7 +40,7 @@ export class SalesforcePersonalizationRepository
 			return this.tokenCache.token;
 		}
 
-		const res = await fetch(env.SF_PERSONALIZATION_TOKEN_URL, {
+		const res = await fetch(this.tokenUrl, {
 			method: "POST",
 			headers: { "Content-Type": "application/x-www-form-urlencoded" },
 			body: new URLSearchParams({

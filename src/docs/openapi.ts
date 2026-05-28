@@ -14,22 +14,16 @@ const registry = new OpenAPIRegistry();
 const UserSchema = registry.register(
 	"User",
 	z.object({
-		id: z
-			.string()
-			.uuid()
-			.openapi({ example: "a1b2c3d4-0001-0001-0001-000000000001" }),
+		id: z.uuid().openapi({ example: "a1b2c3d4-0001-0001-0001-000000000001" }),
 		name: z.string().openapi({ example: "Alice Souza" }),
 		email: z.string().email().openapi({ example: "alice.souza@email.com" }),
-		createdAt: z
-			.string()
-			.datetime()
-			.openapi({ example: "2024-01-10T09:00:00.000Z" }),
+		createdAt: z.date().openapi({ example: "2024-01-10T09:00:00.000Z" }),
 	}),
 );
 
 const CreateUserBody = z.object({
 	name: z.string().min(1).max(100).openapi({ example: "Alice Souza" }),
-	email: z.string().email().openapi({ example: "alice.souza@email.com" }),
+	email: z.email().openapi({ example: "alice.souza@email.com" }),
 });
 
 const UpdateUserBody = z.object({
@@ -39,11 +33,7 @@ const UpdateUserBody = z.object({
 		.max(100)
 		.optional()
 		.openapi({ example: "Alice Souza" }),
-	email: z
-		.string()
-		.email()
-		.optional()
-		.openapi({ example: "alice.souza@email.com" }),
+	email: z.email().optional().openapi({ example: "alice.souza@email.com" }),
 });
 
 const TrackEventBody = z.object({

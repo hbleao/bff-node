@@ -1,4 +1,3 @@
-import { env } from "../config";
 import { AppError } from "../errors/app-error";
 import type {
 	BcpItemData,
@@ -6,21 +5,19 @@ import type {
 	IBcpRepository,
 } from "./interfaces/bcp.repository.interface";
 
+export interface BcpConfig {
+	baseUrl: string;
+	apiKey: string;
+}
+
 export class BcpRepository implements IBcpRepository {
 	private readonly baseUrl: string;
 	private readonly headers: Record<string, string>;
 
-	constructor() {
-		const { BCP_BASE_URL, BCP_API_KEY } = env;
-		if (!BCP_BASE_URL || !BCP_API_KEY) {
-			throw new AppError(
-				"BCP_BASE_URL and BCP_API_KEY must be configured",
-				500,
-			);
-		}
-		this.baseUrl = BCP_BASE_URL;
+	constructor(config: BcpConfig) {
+		this.baseUrl = config.baseUrl;
 		this.headers = {
-			Authorization: `Bearer ${BCP_API_KEY}`,
+			Authorization: `Bearer ${config.apiKey}`,
 			"Content-Type": "application/json",
 		};
 	}
