@@ -1,58 +1,45 @@
-import { env } from "./config";
-import { PersonalizationController } from "./controllers/personalization.controller";
-import { UserController } from "./controllers/user.controller";
-import { BcpRepository } from "./repositories/bcp.repository";
-import { SalesforcePersonalizationRepository } from "./repositories/salesforce-personalization.repository";
-import { UserRepository } from "./repositories/user.repository";
-import { PersonalizationService } from "./services/personalization.service";
-import { UserService } from "./services/user.service";
+import type { Router } from "express";
+import { env } from "./config/env";
+import { MarketingCloudPersonalizationController } from "./modules/marketingCloudPersonalization/controller";
+import { MarketingCloudPersonalizationRepository } from "./modules/marketingCloudPersonalization/repository";
+import { createMcpRouter } from "./modules/marketingCloudPersonalization/routes";
+import { MarketingCloudPersonalizationService } from "./modules/marketingCloudPersonalization/service";
+import { NotificationsController } from "./modules/notifications/controller";
+import { NotificationsRepository } from "./modules/notifications/repository";
+import { createNotificationsRouter } from "./modules/notifications/routes";
+import { NotificationsService } from "./modules/notifications/service";
+import { HttpClient } from "./shared/http/http-client";
 
-function buildPersonalizationController(): PersonalizationController | null {
-	const {
-		BCP_BASE_URL,
-		BCP_API_KEY,
-		SF_PERSONALIZATION_BASE_URL,
-		SF_PERSONALIZATION_DATASET_ID,
-		SF_PERSONALIZATION_CLIENT_ID,
-		SF_PERSONALIZATION_CLIENT_SECRET,
-		SF_PERSONALIZATION_TOKEN_URL,
-	} = env;
-
-	if (
-		!BCP_BASE_URL ||
-		!BCP_API_KEY ||
-		!SF_PERSONALIZATION_BASE_URL ||
-		!SF_PERSONALIZATION_DATASET_ID ||
-		!SF_PERSONALIZATION_CLIENT_ID ||
-		!SF_PERSONALIZATION_CLIENT_SECRET
-	) {
-		return null;
-	}
-
-	const bcpRepository = new BcpRepository({
-		baseUrl: BCP_BASE_URL,
-		apiKey: BCP_API_KEY,
+function buildMcpModule() {
+	const http = new HttpClient({
+		baseUrl: env.MCP_BASE_URL,
+		defaultHeaders: { "x-api-key": env.MCP_API_KEY },
 	});
-
-	const sfRepository = new SalesforcePersonalizationRepository({
-		baseUrl: SF_PERSONALIZATION_BASE_URL,
-		datasetId: SF_PERSONALIZATION_DATASET_ID,
-		clientId: SF_PERSONALIZATION_CLIENT_ID,
-		clientSecret: SF_PERSONALIZATION_CLIENT_SECRET,
-		tokenUrl: SF_PERSONALIZATION_TOKEN_URL,
-	});
-
-	return new PersonalizationController(
-		new PersonalizationService(bcpRepository, sfRepository),
-	);
+	const repository = new MarketingCloudPersonalizationRepository(http);
+	const service = new MarketingCloudPersonalizationService(repository);
+	const controller = new MarketingCloudPersonalizationController(service);
+	return createMcpRouter(controller);
 }
 
-export function createContainer() {
-	const userRepository = new UserRepository();
-	const userController = new UserController(new UserService(userRepository));
-	const personalizationController = buildPersonalizationController();
-
-	return { userController, personalizationController };
+function buildNotificationsModule() {
+	const http = new HttpClient({
+		baseUrl: env.NOTIFICATIONS_BASE_URL,
+		defaultHeaders: { "x-api-key": env.NOTIFICATIONS_API_KEY },
+	});
+	const repository = new NotificationsRepository(http);
+	const service = new NotificationsService(repository);
+	const controller = new NotificationsController(service);
+	return createNotificationsRouter(controller);
 }
 
-export type Container = ReturnType<typeof createContainer>;
+export interface AppRouters {
+	mcpRouter: Router;
+	notificationsRouter: Router;
+}
+
+export function buildContainer(): AppRouters {
+	return {
+		mcpRouter: buildMcpModule(),
+		notificationsRouter: buildNotificationsModule(),
+	};
+}

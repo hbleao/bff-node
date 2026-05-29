@@ -1,3 +1,7 @@
-export * from "./env";
-export * from "./logger";
-export * from "./request-context";
+export { env } from "./env";
+export { logger } from "./logger";
+export {
+	httpRequestCounter,
+	httpRequestDuration,
+	metricsRegistry,
+} from "./metrics";
