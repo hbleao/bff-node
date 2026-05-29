@@ -20,7 +20,12 @@ describe("errorMiddleware", () => {
 		const zodErr = z.object({ name: z.string() }).safeParse({ name: 123 });
 		const res = makeRes();
 
-		errorMiddleware((zodErr as { success: false }).error, req, res, next);
+		errorMiddleware(
+			(zodErr as { success: false; error: any }).error,
+			req,
+			res,
+			next,
+		);
 
 		expect(res.status).toHaveBeenCalledWith(422);
 		expect(res.json).toHaveBeenCalledWith(
